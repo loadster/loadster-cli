@@ -1,6 +1,6 @@
 {
   "name": "loadster-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Loadster Command Line Utility",
   "main": "./js/main.js",
   "bin": "./js/main.js",
