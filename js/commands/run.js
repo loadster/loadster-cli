@@ -1,8 +1,8 @@
 const Axios = require('axios')
 const BaseURL = 'https://api.loadsterperformance.com'
 
-async function start (triggerCode) {
-    let response = await Axios.post(`${BaseURL}/cloud/triggers/${triggerCode}`)
+async function start (triggerCode, label) {
+    let response = await Axios.post(`${BaseURL}/cloud/triggers/${triggerCode}?label=${encodeURI(label || '')}`)
 
     return response.data
 }
@@ -27,9 +27,9 @@ function formatHHMMSS (ms) {
     return `${h}:${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`
 }
 
-module.exports = async (triggerCode, json, observe) => {
+module.exports = async (triggerCode, label, json, observe) => {
     try {
-        let result = await start(triggerCode)
+        let result = await start(triggerCode, label)
 
         if (observe) {
             if (!json) {

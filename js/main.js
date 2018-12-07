@@ -14,14 +14,6 @@ const options = Options([
         name: 'version',
         alias: 'v',
         type: Boolean
-    },
-    {
-        name: 'json',
-        type: Boolean
-    },
-    {
-        name: 'observe',
-        type: Boolean
     }
 ], {stopAtFirstUnknown: true})
 
@@ -32,15 +24,19 @@ const main = async function () {
         await version()
     } else if (options['command'] === 'run') {
         if (argv.length > 0) {
-            let json = argv.indexOf('--json') >= 0
-            let observe = argv.indexOf('--observe') >= 0
+            let runOptions = Options([
+                {name: 'label', type: String},
+                {name: 'json', type: Boolean},
+                {name: 'observe', type: Boolean}
+            ], {argv: argv.slice(1)})
 
-            await run(argv[0], json, observe)
+            await run(argv[0], runOptions.label, runOptions.json, runOptions.observe)
         } else {
             await usage(1)
         }
     } else {
-        await usage(0)
+        await
+            usage(0)
     }
 }
 
