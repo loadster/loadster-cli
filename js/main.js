@@ -18,6 +18,10 @@ const options = Options([
     {
         name: 'json',
         type: Boolean
+    },
+    {
+        name: 'observe',
+        type: Boolean
     }
 ], {stopAtFirstUnknown: true})
 
@@ -28,7 +32,10 @@ const main = async function () {
         await version()
     } else if (options['command'] === 'run') {
         if (argv.length > 0) {
-            await run(argv[0], argv.indexOf('--json') !== -1)
+            let json = argv.indexOf('--json') >= 0
+            let observe = argv.indexOf('--observe') >= 0
+
+            await run(argv[0], json, observe)
         } else {
             await usage(1)
         }
