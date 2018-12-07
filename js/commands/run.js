@@ -31,11 +31,11 @@ module.exports = async (triggerCode, json, observe) => {
     try {
         let result = await start(triggerCode)
 
-        if (!json) {
-            console.log(`Test launched! To view it in your browser:\n\n${result.reportUrl}\n`)
-        }
-
         if (observe) {
+            if (!json) {
+                console.log(`Test launched! To view it in your browser:\n\n${result.reportUrl}\n`)
+            }
+
             let status
 
             while (true) {
