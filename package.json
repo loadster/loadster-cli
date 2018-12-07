@@ -2,8 +2,8 @@
   "name": "loadster-cli",
   "version": "1.0.0",
   "description": "Loadster Command Line Utility",
-  "main": "./js/loadster-cli.js",
-  "bin": "./js/loadster-cli.js",
+  "main": "./js/main.js",
+  "bin": "./js/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "pkg": "pkg package.json --targets node10-macos-x64,node10-windows-x64,node10-linux-x64 --out-path build"
