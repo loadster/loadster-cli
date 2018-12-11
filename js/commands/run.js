@@ -7,8 +7,8 @@ async function start (triggerCode, label) {
     return response.data
 }
 
-async function getStatus (statusUrl) {
-    let response = await Axios.get(statusUrl)
+async function get (url) {
+    let response = await Axios.get(url)
 
     return response.data
 }
@@ -27,6 +27,35 @@ function formatHHMMSS (ms) {
     return `${h}:${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`
 }
 
+const statusKeys = [
+    'runningUsers',
+    'responseTimeAverage',
+    'responseTimeP90',
+    'uploadThroughputBytesPerSecond',
+    'downloadThroughputBytesPerSecond',
+    'pagesPerSecond',
+    'hitsPerSecond',
+    'totalPages',
+    'totalHits',
+    'totalErrors',
+    'totalIterations'
+]
+
+const reportKeys = [
+    'maxUsers',
+    'avgBytesPerSecond',
+    'maxBytesPerSecond',
+    'avgPagesPerSecond',
+    'maxPagesPerSecond',
+    'avgHitsPerSecond',
+    'maxHitsPerSecond',
+    'totalBytesTransferred',
+    'totalPages',
+    'totalHits',
+    'totalErrors',
+    'totalIterations'
+]
+
 module.exports = async (triggerCode, label, json, observe) => {
     try {
         let result = await start(triggerCode, label)
@@ -39,7 +68,7 @@ module.exports = async (triggerCode, label, json, observe) => {
             let status
 
             while (true) {
-                status = await getStatus(result.statusUrl)
+                status = await get(result.statusUrl)
 
                 if (status.finished || status.failed || status.canceled) {
                     break
@@ -48,38 +77,41 @@ module.exports = async (triggerCode, label, json, observe) => {
                 } else if (!status.started) {
                     console.log('Test is starting...')
                 } else {
-                    let runningUsers = status.populations.map(p => p.runningUsers).reduce((t, n) => t + n)
+                    status.runningUsers = status.populations.map(p => p.runningUsers).reduce((t, n) => t + n)
 
                     console.log()
                     console.log(`[${formatHHMMSS(status.elapsedTime)}]`)
-                    console.log(` - Running V-Users:     ${runningUsers}`)
-                    console.log(` - Response Time (avg): ${status.responseTimeAverage.toFixed(2)} s `)
-                    console.log(` - Response Time (p90): ${status.responseTimeP90.toFixed(2)} s `)
-                    console.log(` - Response Time (p80): ${status.responseTimeP80.toFixed(2)} s `)
-                    console.log(` - Upload Throughput:   ${status.uploadThroughputBytesPerSecond.toFixed(0)} bytes/sec`)
-                    console.log(` - Download Throughput: ${status.downloadThroughputBytesPerSecond.toFixed(0)} bytes/sec`)
-                    console.log(` - Pages per Second:    ${status.pagesPerSecond.toFixed(1)}`)
-                    console.log(` - Hits per Second:     ${status.hitsPerSecond.toFixed(1)}`)
-                    console.log(` - Total Pages:         ${status.totalPages}`)
-                    console.log(` - Total Hits:          ${status.totalHits}`)
-                    console.log(` - Total Errors:        ${status.totalErrors}`)
-                    console.log(` - Total Iterations:    ${status.totalIterations}`)
+
+                    for (let statusKey of statusKeys) {
+                        console.log(` - ${statusKey}: ${(status[statusKey] || 0).toFixed(2)}`)
+                    }
                 }
 
                 await sleep(5000)
             }
 
+            let report = await get(result.reportDataUrl)
+
+            report.maxUsers = report.maxVirtualUsers
+
+            delete report['jsonDataByProvider']
+            delete report['urlsByTotalResponseTime']
+
             if (json) {
-                console.log(JSON.stringify(status))
+                console.log(JSON.stringify(report))
             } else {
                 console.log()
 
                 if (status.finished) {
-                    console.log('Test is finished!')
+                    console.log('[Finished]')
+
+                    for (let reportKey of reportKeys) {
+                        console.log(` - ${reportKey}: ${(report[reportKey] || 0).toFixed(2)}`)
+                    }
                 } else if (status.failed) {
-                    console.log('Test failed!')
+                    console.log('[Failed]')
                 } else if (status.canceled) {
-                    console.log('Test canceled!')
+                    console.log('[Canceled]')
                 }
             }
         } else if (json) {
@@ -87,12 +119,16 @@ module.exports = async (triggerCode, label, json, observe) => {
         } else {
             console.log(`${result.message}\n`)
 
+            if (result.reportUrl) {
+                console.log(`View the running test or test report in your browser:\n\n${result.reportUrl}\n`)
+            }
+
             if (result.statusUrl) {
                 console.log(`Fetch the current test status as JSON at any time:\n\n${result.statusUrl}\n`)
             }
 
-            if (result.reportUrl) {
-                console.log(`View the running test or test report in your browser:\n\n${result.reportUrl}\n`)
+            if (result.reportDataUrl) {
+                console.log(`Fetch the test report data as JSON after finishing:\n\n${result.reportDataUrl}\n`)
             }
         }
     } catch (err) {
