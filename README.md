@@ -46,3 +46,13 @@ $ loadster run <trigger-code> --assert 'totalErrors == 0' --assert 'avgHitsPerSe
 All assertions are evaluated immediately after the test finishes. If the 
 test launched successfully and all assertions passed, the process will exit
 with a `0` exit code. Otherwise, it will exit with a non-zero exit code.
+
+## Getting Help
+
+This open source CLI is fully supported by [Loadster](https://loadster.app) 
+as a companion tool to our load testing platform. We would be happy to assist
+you if you're having trouble, but also would enjoy hearing how you're using
+the Loadster CLI in your Continuous Integration process or for whatever other
+situation you find it useful for. 
+
+Email us at [support@loadster.app](mailto:support@loadster.app)!
