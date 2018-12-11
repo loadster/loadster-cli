@@ -3,7 +3,7 @@
 This is a simple Loadster Command Line Interface, to work with Loadster's
 cloud-hybrid load testing platform at [loadster.app](https://loadster.app).
 
-## Run a Load Test
+## Start a Load Test
 
 You can use this utility to kick off load tests from your Loadster
 scenarios. To run a load test, you must first create a scenario in
@@ -13,15 +13,36 @@ the **trigger code** unique to that scenario.
 To launch a load test and exit immediately:
 
 ```
-$ loadster run <trigger-code> [--observe] [--json]
+$ loadster start <trigger-code> [--json]
 ```
-
-If you include the `--observe` flag, the process will block while the test
-runs, and print stats every few seconds. Otherwise, the process will simply
-launch the test and exit immediately.
 
 If you include the `--json` flag, the output will be printed in JSON instead
 of human-friendly text. This is useful if you're writing your own scripts.
 
-Once it starts, you can observe the load test in real time
-from your Loadster dashboard.
+Once the test is launched, the CLI will print out URLs for monitoring the
+progress or viewing the live test on your Loadster dashboard.
+
+## Run a Load Test (Blocking)
+
+You can also start a load test, and block until it finishes:
+
+```
+$ loadster run <trigger-code> [--json]
+```
+
+The `run` option will monitor the test as it runs, printing out high-level 
+metrics every few seconds. At the end of the test, final test metrics
+are printed.
+
+### Assertions
+
+With the `run` option, you can easily evaluate certain high-level metrics
+with pass/fail assertions. For example:
+
+```
+$ loadster run <trigger-code> --assert 'totalErrors == 0' --assert 'avgHitsPerSecond > 7.5' --assert 'avgBytesPerSecond <= 10000'
+```
+
+All assertions are evaluated immediately after the test finishes. If the 
+test launched successfully and all assertions passed, the process will exit
+with a `0` exit code. Otherwise, it will exit with a non-zero exit code.
