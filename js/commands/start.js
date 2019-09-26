@@ -1,8 +1,8 @@
 const Axios = require('axios')
-const BaseURL = 'https://api.loadsterperformance.com'
+const BaseURL = 'https://api.loadster.app'
 
 async function start (triggerCode, label) {
-    let response = await Axios.post(`${BaseURL}/cloud/triggers/${triggerCode}?label=${encodeURI(label || '')}`)
+    let response = await Axios.post(`${BaseURL}/s/${triggerCode}?label=${encodeURI(label || '')}`)
 
     return response.data
 }
