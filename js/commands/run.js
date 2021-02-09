@@ -74,6 +74,11 @@ const reportKeys = [
     'totalIterations'
 ]
 
+const RUNNING = "RUNNING";
+const FINISHED = "FINISHED";
+const FAILED = "FAILED";
+const CANCELED = "CANCELED";
+
 module.exports = async (triggerCode, label, json, assert) => {
     let assertions = (assert || []).map(parseAssertion)
 
@@ -89,11 +94,11 @@ module.exports = async (triggerCode, label, json, assert) => {
         while (true) {
             status = await get(result.statusUrl)
 
-            if (status.finished || status.failed || status.canceled) {
+            if (status.stage === FINISHED || status.stage === FAILED || status.stage === CANCELED) {
                 break
             } else if (json) {
                 console.log(JSON.stringify(status))
-            } else if (!status.started) {
+            } else if (status.stage !== RUNNING ) {
                 console.log('Test is starting...')
             } else {
                 status.runningUsers = status.populations.map(p => p.runningUsers).reduce((t, n) => t + n)
