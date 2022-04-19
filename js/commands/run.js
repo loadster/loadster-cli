@@ -1,24 +1,5 @@
-const Process = require('process');
-const Axios = require('axios');
-const BaseURL = 'https://api.loadster.app';
-
-async function start (triggerCode, label) {
-  let response = await Axios.post(`${BaseURL}/s/${triggerCode}?label=${encodeURI(label || '')}`);
-
-  return response.data;
-}
-
-async function get (url) {
-  let response = await Axios.get(url);
-
-  return response.data;
-}
-
-async function sleep (ms) {
-  await new Promise(resolve => {
-    setTimeout(resolve, ms);
-  });
-}
+const process = require('process');
+const sleep = require('sleep-promise');
 
 function formatHHMMSS (ms) {
   let h = Math.floor(ms / 3600000);
@@ -79,101 +60,115 @@ const FINISHED = 'FINISHED';
 const FAILED = 'FAILED';
 const CANCELED = 'CANCELED';
 
-module.exports = async (triggerCode, label, json, assert) => {
-  let assertions = (assert || []).map(parseAssertion);
+module.exports = ({ axios }) => {
+  async function start (triggerCode, label) {
+    let response = await axios.post(`/s/${triggerCode}?label=${encodeURI(label || '')}`);
 
-  try {
-    let result = await start(triggerCode, label);
+    return response.data;
+  }
 
-    if (!json) {
-      console.log(`Test launched! To view it in your browser:\n\n${result.reportUrl}\n`);
-    }
+  async function get (url) {
+    let response = await axios.get(url);
 
-    let status;
+    return response.data;
+  }
 
-    while (true) {
-      status = await get(result.statusUrl);
+  return async function run (triggerCode, label, json, assert) {
+    let assertions = (assert || []).map(parseAssertion);
 
-      if (status.stage === FINISHED || status.stage === FAILED || status.stage === CANCELED) {
-        break;
-      } else if (json) {
-        console.log(JSON.stringify(status));
-      } else if (status.stage !== RUNNING) {
-        console.log('Test is starting...');
-      } else {
-        status.runningUsers = status.populations.map(p => p.runningUsers).reduce((t, n) => t + n);
+    try {
+      let result = await start(triggerCode, label);
 
-        console.log();
-        console.log(`[${formatHHMMSS(status.elapsedTime)}]`);
+      if (!json) {
+        console.log(`Test launched! To view it in your browser:\n\n${result.reportUrl}\n`);
+      }
 
-        for (let statusKey of statusKeys) {
-          console.log(` - ${statusKey}: ${(status[statusKey] || 0).toFixed(2)}`);
+      let status;
+
+      while (true) {
+        status = await get(result.statusUrl);
+
+        if (status.stage === FINISHED || status.stage === FAILED || status.stage === CANCELED) {
+          break;
+        } else if (json) {
+          console.log(JSON.stringify(status));
+        } else if (status.stage !== RUNNING) {
+          console.log('Test is starting...');
+        } else {
+          status.runningUsers = status.populations.map(p => p.runningUsers).reduce((t, n) => t + n);
+
+          console.log();
+          console.log(`[${formatHHMMSS(status.elapsedTime)}]`);
+
+          for (let statusKey of statusKeys) {
+            console.log(` - ${statusKey}: ${(status[statusKey] || 0).toFixed(2)}`);
+          }
         }
+
+        await sleep(5000);
       }
 
-      await sleep(5000);
-    }
+      let report = await get(result.reportDataUrl);
 
-    let report = await get(result.reportDataUrl);
+      report.maxUsers = report.maxVirtualUsers;
 
-    report.maxUsers = report.maxVirtualUsers;
-
-    delete report['jsonDataByProvider'];
-    delete report['urlsByTotalResponseTime'];
-
-    if (json) {
-      console.log(JSON.stringify(report));
-    } else {
-      console.log();
-
-      if (status.finished) {
-        console.log('[Finished]');
-
-        for (let reportKey of reportKeys) {
-          console.log(` - ${reportKey}: ${(report[reportKey] || 0).toFixed(2)}`);
-        }
-      } else if (status.failed) {
-        console.log('[Failed]');
-      } else if (status.canceled) {
-        console.log('[Canceled]');
-      }
-    }
-
-    if (assertions.length) {
-      console.log();
-    }
-
-    for (let assertion of assertions) {
-      let actual = report[assertion.name];
-      let pass = false;
-
-      if (assertion.operator === '==') {
-        pass = actual === assertion.value;
-      } else if (assertion.operator === '>=') {
-        pass = actual >= assertion.value;
-      } else if (assertion.operator === '<=') {
-        pass = actual <= assertion.value;
-      } else if (assertion.operator === '>') {
-        pass = actual > assertion.value;
-      } else if (assertion.operator === '<') {
-        pass = actual < assertion.value;
-      }
+      delete report['jsonDataByProvider'];
+      delete report['urlsByTotalResponseTime'];
 
       if (json) {
-        console.log(JSON.stringify({
-          assertion: `${assertion.name} ${assertion.operator} ${assertion.value}`,
-          actual: actual,
-          pass: pass
-        }));
+        console.log(JSON.stringify(report));
       } else {
-        console.log(`${pass ? 'PASS' : 'FAIL'} [${assertion.name} ${assertion.operator} ${assertion.value}] (actual: ${actual})`);
+        console.log();
+
+        if (status.finished) {
+          console.log('[Finished]');
+
+          for (let reportKey of reportKeys) {
+            console.log(` - ${reportKey}: ${(report[reportKey] || 0).toFixed(2)}`);
+          }
+        } else if (status.failed) {
+          console.log('[Failed]');
+        } else if (status.canceled) {
+          console.log('[Canceled]');
+        }
       }
 
-      if (!pass) {
-        Process.exitCode = 3;
+      if (assertions.length) {
+        console.log();
       }
+
+      for (let assertion of assertions) {
+        let actual = report[assertion.name];
+        let pass = false;
+
+        if (assertion.operator === '==') {
+          pass = actual === assertion.value;
+        } else if (assertion.operator === '>=') {
+          pass = actual >= assertion.value;
+        } else if (assertion.operator === '<=') {
+          pass = actual <= assertion.value;
+        } else if (assertion.operator === '>') {
+          pass = actual > assertion.value;
+        } else if (assertion.operator === '<') {
+          pass = actual < assertion.value;
+        }
+
+        if (json) {
+          console.log(JSON.stringify({
+            assertion: `${assertion.name} ${assertion.operator} ${assertion.value}`,
+            actual: actual,
+            pass: pass
+          }));
+        } else {
+          console.log(`${pass ? 'PASS' : 'FAIL'} [${assertion.name} ${assertion.operator} ${assertion.value}] (actual: ${actual})`);
+        }
+
+        if (!pass) {
+          process.exitCode = 3;
+        }
+      }
+    } catch (err) {
+      throw new Error(`Unable to run test with trigger code ${triggerCode} (${err.response.status})`);
     }
-  } catch (err) {
-    throw new Error(`Unable to run test with trigger code ${triggerCode} (${err.response.status})`);
-  }
+  };
 };

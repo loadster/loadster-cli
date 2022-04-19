@@ -1,6 +1,18 @@
 const Process = require('process');
 const Options = require('command-line-args');
 
+const axios = require('axios');
+const config = require('./utils/config');
+
+const start = require('./commands/start')({ axios });
+const login = require('./commands/login')({ axios, config });
+const logout = require('./commands/logout')({ config });
+const run = require('./commands/run')({ axios });
+const usage = require('./commands/usage');
+const version = require('./commands/version');
+
+axios.defaults.baseURL = 'https://api.loadster.app';
+
 const StandardOptions = [
   {
     name: 'command',
@@ -13,18 +25,18 @@ const StandardOptions = [
   }
 ];
 
-const start = require('./commands/start');
-const run = require('./commands/run');
-const usage = require('./commands/usage');
-const version = require('./commands/version');
-
 const main = async function () {
   const options = Options(StandardOptions, { stopAtFirstUnknown: true });
+  const command = options['command'];
   const argv = options._unknown || [];
 
   if (options['version']) {
     await version();
-  } else if (options['command'] === 'start') {
+  } else if (command === 'login') {
+    await login();
+  } else if (command === 'logout') {
+    await logout();
+  } else if (command === 'start') {
     if (argv.length > 0) {
       let runOptions = Options([
         { name: 'label', type: String },
