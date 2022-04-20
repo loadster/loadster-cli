@@ -1,7 +1,7 @@
-module.exports = ({ axios }) => {
+module.exports = ({ api }) => {
   return async function (triggerCode, label, json) {
     try {
-      let response = await axios.post(`/s/${triggerCode}?label=${encodeURI(label || '')}`);
+      let response = await api.invokeTrigger(triggerCode, label);
       let result = response.data;
 
       if (json) {

@@ -60,13 +60,7 @@ const FINISHED = 'FINISHED';
 const FAILED = 'FAILED';
 const CANCELED = 'CANCELED';
 
-module.exports = ({ axios }) => {
-  async function start (triggerCode, label) {
-    let response = await axios.post(`/s/${triggerCode}?label=${encodeURI(label || '')}`);
-
-    return response.data;
-  }
-
+module.exports = ({ api, axios }) => {
   async function get (url) {
     let response = await axios.get(url);
 
@@ -77,7 +71,7 @@ module.exports = ({ axios }) => {
     let assertions = (assert || []).map(parseAssertion);
 
     try {
-      let result = await start(triggerCode, label);
+      let result = await api.invokeTrigger(triggerCode, label);
 
       if (!json) {
         console.log(`Test launched! To view it in your browser:\n\n${result.reportUrl}\n`);

@@ -18,7 +18,7 @@ const promptSchema = {
   }
 };
 
-module.exports = ({ axios, config }) => {
+module.exports = ({ api, config }) => {
   return async function login () {
     prompt.start();
 
@@ -33,13 +33,11 @@ module.exports = ({ axios, config }) => {
     });
 
     try {
-      const loginResult = await axios.post(`/account/actions/login`, { username, password });
+      const loginResult = await api.login(username, password);
 
-      if (loginResult.status === 200) {
-        config.setAuthToken(loginResult.data.token);
+      config.setAuthToken(loginResult.token);
 
-        console.log(`Logged in as ${loginResult.data.profile.email}`);
-      }
+      console.log(`Logged in as ${loginResult.data.profile.email}`);
     } catch (err) {
       throw new Error('Login failed! Please try again.');
     }
