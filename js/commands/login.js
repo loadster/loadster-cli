@@ -37,7 +37,7 @@ module.exports = ({ api, config }) => {
 
       config.setAuthToken(loginResult.token);
 
-      console.log(`Logged in as ${loginResult.data.profile.email}`);
+      console.log(`Logged in as ${loginResult.profile.email}`);
     } catch (err) {
       throw new Error('Login failed! Please try again.');
     }

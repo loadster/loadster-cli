@@ -38,7 +38,7 @@ const login = require('./commands/login')({ api, config });
 const logout = require('./commands/logout')({ config });
 const run = require('./commands/run')({ api, axios });
 const projects = require('./commands/projects')({ api, config });
-const usage = require('./commands/usage')(cliOptions);
+const usage = require('./commands/usage')();
 const version = require('./commands/version');
 
 const main = async function () {
@@ -61,7 +61,7 @@ const main = async function () {
 
       await start(argv[0], runOptions.label, runOptions.json);
     } else {
-      await usage(1);
+      await usage(1, command);
     }
   } else if (options['command'] === 'run') {
     if (argv.length > 0) {
@@ -73,18 +73,18 @@ const main = async function () {
 
       await run(argv[0], runOptions.label, runOptions.json, runOptions.assert);
     } else {
-      await usage(1);
+      await usage(1, command);
     }
   } else if (options['command'] === 'projects') {
-    const subcommand = argv[0] || 'list';
+    const subcommand = argv[0] || 'help';
 
-    if (!['list', 'use'].includes(subcommand)) {
-      await usage(0);
+    if (['list', 'use'].includes(subcommand)) {
+      await projects[subcommand](argv.slice(1));
+    } else {
+      await usage(1, command);
     }
-
-    await projects[subcommand](argv.slice(1));
   } else {
-    await usage(0);
+    await usage(0, command);
   }
 };
 
