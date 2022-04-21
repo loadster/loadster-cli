@@ -46,7 +46,7 @@ const main = async function () {
   const command = options['command'];
   const argv = options._unknown || [];
 
-  if (options['version']) {
+  if (options['version'] || command === 'version') {
     await version();
   } else if (command === 'login') {
     await login();
