@@ -14,6 +14,11 @@ module.exports = ({ axios }) => {
       const response = await axios.post(`/s/${triggerCode}?label=${encodeURI(label || '')}`);
 
       return response.data;
+    },
+    async playScript (projectId, commands) {
+      const response = await axios.post(`/player/script/actions/start`, { projectId, commands });
+
+      return response.data;
     }
   };
 };

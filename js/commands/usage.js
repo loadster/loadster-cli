@@ -2,7 +2,7 @@ const process = require('process');
 const cliUsage = require('command-line-usage');
 
 module.exports = () => {
-  return function (exitCode, command) {
+  return function (exitCode, command, hint) {
     const title = process.title;
 
     if (command === 'projects') {
@@ -81,6 +81,7 @@ module.exports = () => {
           header: 'Command List',
           content: [
             { name: 'login', summary: 'Log in to your Loadster account from the command line.' },
+            { name: 'play', summary: 'Play a script from a local file.' },
             { name: 'start', summary: 'Start a load test using a trigger code.' },
             { name: 'run', summary: 'Run a load test using a trigger code, waiting for it to finish.' },
             { name: 'projects', summary: 'List your projects or use one for future operations.' },
@@ -92,6 +93,10 @@ module.exports = () => {
       ]);
 
       console.log(guide + '\n');
+    }
+
+    if (hint) {
+      console.log(hint);
     }
 
     process.exitCode = exitCode || 0;

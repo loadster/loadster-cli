@@ -33,9 +33,10 @@ axios.interceptors.request.use(async requestConfig => {
 
 const api = require('./utils/api')({ axios });
 
-const start = require('./commands/start')({ api });
 const login = require('./commands/login')({ api, config });
 const logout = require('./commands/logout')({ config });
+const play = require('./commands/play')({ api, config });
+const start = require('./commands/start')({ api });
 const run = require('./commands/run')({ api, axios });
 const projects = require('./commands/projects')({ api, config });
 const usage = require('./commands/usage')();
@@ -62,6 +63,17 @@ const main = async function () {
       await start(argv[0], runOptions.label, runOptions.json);
     } else {
       await usage(1, command);
+    }
+  } else if (options['command'] === 'play') {
+    const filename = argv[0];
+    const projectId = config.getProjectId();
+
+    if (!filename) {
+      await usage(1, command);
+    } else if (!projectId) {
+      await usage(1, command, `No project configured! Choose a project with '${process.title} projects' before you play a script.`);
+    } else {
+      await play(filename);
     }
   } else if (options['command'] === 'run') {
     if (argv.length > 0) {
