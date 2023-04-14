@@ -36,6 +36,7 @@ module.exports = ({ api, config }) => {
       const loginResult = await api.login(username, password);
 
       config.setAuthToken(loginResult.token);
+      config.setTeamId((await api.getTeam()).id);
 
       console.log(`Logged in as ${loginResult.profile.email}`);
     } catch (err) {

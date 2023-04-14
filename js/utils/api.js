@@ -5,6 +5,11 @@ module.exports = ({ axios }) => {
 
       return result.data;
     },
+    async getTeam () {
+      const result = await axios.get(`/team`);
+
+      return result.data;
+    },
     async listProjects () {
       const result = await axios.get(`/projects`);
 

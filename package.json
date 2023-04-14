@@ -33,6 +33,7 @@
     "node-localstorage": "^2.2.1",
     "ospath": "^1.2.2",
     "prompt": "^1.3.0",
+    "pusher-js": "^8.0.2",
     "sleep-promise": "^9.1.0"
   },
   "devDependencies": {

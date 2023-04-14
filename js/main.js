@@ -1,7 +1,9 @@
 const process = require('process');
 const args = require('command-line-args');
+const config = require('./utils/config');
+
 const axios = require('axios').create({
-  baseURL: process.env['LOADSTER_API_URL'] || 'https://api.loadster.app',
+  baseURL: config.getApiBaseUrl(),
   timeout: 10000
 });
 
@@ -17,8 +19,6 @@ const cliOptions = [
   }
 ];
 
-const config = require('./utils/config');
-
 axios.interceptors.request.use(async requestConfig => {
   const token = config.getAuthToken();
 
@@ -32,10 +32,11 @@ axios.interceptors.request.use(async requestConfig => {
 });
 
 const api = require('./utils/api')({ axios });
+const events = require('./utils/events')({ config });
 
 const login = require('./commands/login')({ api, config });
 const logout = require('./commands/logout')({ config });
-const play = require('./commands/play')({ api, config });
+const play = require('./commands/play')({ api, events, config });
 const start = require('./commands/start')({ api });
 const run = require('./commands/run')({ api, axios });
 const projects = require('./commands/projects')({ api, config });
