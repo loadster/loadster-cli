@@ -1,6 +1,7 @@
 const process = require('process');
 const args = require('command-line-args');
 const config = require('./utils/config');
+const control = require('./utils/control');
 
 const axios = require('axios').create({
   baseURL: config.getApiBaseUrl(),
@@ -36,12 +37,13 @@ const events = require('./utils/events')({ config });
 
 const login = require('./commands/login')({ api, config });
 const logout = require('./commands/logout')({ config });
-const play = require('./commands/play')({ api, events, config });
+const play = require('./commands/play')({ api, events, config, control });
 const start = require('./commands/start')({ api });
 const run = require('./commands/run')({ api, axios });
 const projects = require('./commands/projects')({ api, config });
 const usage = require('./commands/usage')();
 const version = require('./commands/version');
+const { die } = require("./utils/control");
 
 const main = async function () {
   const options = args(cliOptions, { stopAtFirstUnknown: true });
@@ -102,8 +104,5 @@ const main = async function () {
 };
 
 main().catch(err => {
-  console.error(err.toString());
-  console.error(err);
-
-  process.exitCode = 1;
+  die('Operation failed!', err);
 });

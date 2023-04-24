@@ -1,6 +1,7 @@
 const fs = require('fs/promises');
+const { die } = require('../utils/control');
 
-module.exports = ({ api, events, config }) => {
+module.exports = ({ api, config, control, events }) => {
   let scriptRunId = null;
 
   async function loadCommands (filename) {
@@ -11,7 +12,7 @@ module.exports = ({ api, events, config }) => {
 
       commands.push({ type: 'code', code: data, language: 'javascript', enabled: true });
     } catch (err) {
-      throw new Error(`Unable to read ${filename}`);
+      die(`Unable to read file: ${filename}`);
     }
 
     return commands;
@@ -21,7 +22,7 @@ module.exports = ({ api, events, config }) => {
     try {
       await events.subscribe(handleEvent);
     } catch (err) {
-      console.error('Log subscriber failed! You might not see realtime script output.', err);
+      console.warn('Websocket connection failed! You might not see realtime output.', err);
     }
   }
 
@@ -32,11 +33,12 @@ module.exports = ({ api, events, config }) => {
   }
 
   async function handleEvent (type, data) {
-    if (data.scriptRunId && data.scriptRunId !== scriptRunId) {
+    if (data['scriptRunId'] !== scriptRunId) {
       // ignored, it's a different script run
     } else if (type === 'PlayScriptFinishedEvent') {
       setTimeout(cleanup, 3000);
     } else if (type === 'PlayScriptLogEvent') {
+      // TODO - sometimes logs arrive out of order... maybe we need a rolling sorting window?
       if (data.type === 'info') {
         console.log(`    ${data.text}`);
       } else {
@@ -46,18 +48,19 @@ module.exports = ({ api, events, config }) => {
   }
 
   return async function (filename) {
+    const projectId = config.getProjectId();
+    const commands = await loadCommands(filename);
+
     await subscribe();
 
     try {
-      const projectId = config.getProjectId();
-      const commands = await loadCommands(filename);
       const response = await api.playScript(projectId, commands);
 
-      scriptRunId = response.scriptRunId;
+      scriptRunId = response['scriptRunId'];
     } catch (err) {
       await cleanup();
 
-      throw new Error(`Failed to play script at ${filename}`);
+      die('Failed to play script!', err);
     }
   };
 }

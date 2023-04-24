@@ -27,11 +27,15 @@ module.exports = ({ config }) => {
     async subscribe (handler) {
       await createPusherIfNecessary();
 
-      channel = pusher.subscribe(channelName);
+      try {
+        channel = pusher.subscribe(channelName);
 
-      channel.bind_global((eventType, event) => {
-        handler(eventType, typeof event === 'string' ? JSON.parse(event) : event);
-      });
+        channel.bind_global((eventType, event) => {
+          handler(eventType, typeof event === 'string' ? JSON.parse(event) : event);
+        });
+      } catch (err) {
+        console.warn('Websocket subscription failed! You might not see realtime output.');
+      }
     },
     async unsubscribe () {
       if (channel) {

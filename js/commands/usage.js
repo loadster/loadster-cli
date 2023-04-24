@@ -2,7 +2,7 @@ const process = require('process');
 const cliUsage = require('command-line-usage');
 
 module.exports = () => {
-  return function (exitCode, command, hint) {
+  return function (exitCode, command, hint = null) {
     const title = process.title;
 
     if (command === 'projects') {
