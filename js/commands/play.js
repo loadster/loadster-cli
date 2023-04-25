@@ -2,6 +2,7 @@ const WIND_DOWN_MS = 3000;
 const LOG_BUFFER_MS = 200;
 
 const fs = require('fs/promises');
+const colors = require('colors/safe');
 const { die } = require('../utils/control');
 
 module.exports = ({ api, config, events }) => {
@@ -29,9 +30,13 @@ module.exports = ({ api, config, events }) => {
 
     aged.forEach(entry => {
       if (entry.type === 'info') {
-        console.log(`   ${entry.text}`);
+        console.log(colors.dim(`   ${entry.text}`));
+      } else if (entry.type === 'warning') {
+        console.log(colors.red(colors.dim(`   ${entry.text}`)));
+      } else if (entry.type === 'error') {
+        console.log(colors.red(`   ${entry.text}`));
       } else {
-        console.log(`${entry.text}`);
+        console.log(colors.bold(`${entry.text}`));
       }
 
       logs.splice(logs.indexOf(entry), 1);
