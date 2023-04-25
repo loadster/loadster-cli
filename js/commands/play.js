@@ -1,7 +1,12 @@
+const WIND_DOWN_MS = 3000;
+const LOG_BUFFER_MS = 200;
+
 const fs = require('fs/promises');
 const { die } = require('../utils/control');
 
-module.exports = ({ api, config, control, events }) => {
+module.exports = ({ api, config, events }) => {
+  const logs = [];
+
   let scriptRunId = null;
 
   async function loadCommands (filename) {
@@ -18,32 +23,41 @@ module.exports = ({ api, config, control, events }) => {
     return commands;
   }
 
-  async function subscribe () {
-    try {
-      await events.subscribe(handleEvent);
-    } catch (err) {
-      console.warn('Websocket connection failed! You might not see realtime output.', err);
-    }
+  function flushLogs (age) {
+    const now = Date.now();
+    const aged = logs.sort((a, b) => a.time - b.time).filter(entry => entry.received < now - age);
+
+    aged.forEach(entry => {
+      if (entry.type === 'info') {
+        console.log(`   ${entry.text}`);
+      } else {
+        console.log(`${entry.text}`);
+      }
+
+      logs.splice(logs.indexOf(entry), 1);
+    });
   }
 
-  async function cleanup () {
+  async function unsubscribeAndFinish () {
     scriptRunId = null;
 
     await events.unsubscribe();
+
+    flushLogs(0);
   }
 
   async function handleEvent (type, data) {
     if (data['scriptRunId'] !== scriptRunId) {
       // ignored, it's a different script run
     } else if (type === 'PlayScriptFinishedEvent') {
-      setTimeout(cleanup, 3000);
+      setTimeout(unsubscribeAndFinish, WIND_DOWN_MS);
     } else if (type === 'PlayScriptLogEvent') {
-      // TODO - sometimes logs arrive out of order... maybe we need a rolling sorting window?
-      if (data.type === 'info') {
-        console.log(`    ${data.text}`);
-      } else {
-        console.log(data.text);
-      }
+      logs.push({
+        ...data,
+        received: Date.now()
+      });
+
+      flushLogs(LOG_BUFFER_MS);
     }
   }
 
@@ -51,14 +65,14 @@ module.exports = ({ api, config, control, events }) => {
     const projectId = config.getProjectId();
     const commands = await loadCommands(filename);
 
-    await subscribe();
+    await events.subscribe(handleEvent);
 
     try {
       const response = await api.playScript(projectId, commands);
 
       scriptRunId = response['scriptRunId'];
     } catch (err) {
-      await cleanup();
+      await unsubscribeAndFinish();
 
       die('Failed to play script!', err);
     }
