@@ -21,7 +21,7 @@ module.exports = ({ axios }) => {
       return response.data;
     },
     async playScript (projectId, commands) {
-      const response = await axios.post(`/player/script/actions/start`, { projectId, commands });
+      const response = await axios.post(`/player/script/actions/start`, { projectId, commands, source: 'CLI' });
 
       return response.data;
     }
