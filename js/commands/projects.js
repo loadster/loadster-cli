@@ -3,9 +3,31 @@ module.exports = ({ api, config }) => {
     async list () {
       const projects = await api.listProjects();
 
-      projects.forEach(project => {
-        console.log(`${project.name} <${project.id}>`);
-      })
+      if (projects?.length) {
+        console.log(``);
+
+        projects.forEach(project => {
+          console.log(`${project.name} <${project.id}>`);
+
+          if (project.scripts?.length) {
+            console.log(`  Scripts:`);
+            project.scripts.forEach(script => {
+              console.log(`    - ${script.name} <${script.id}>`);
+            });
+          }
+
+          if (project.scenarios?.length) {
+            console.log(`  Scenarios:`);
+            project.scenarios.forEach(scenario => {
+              console.log(`    - ${scenario.name} <${scenario.id}> <${scenario.shortcut}>`);
+            });
+          }
+
+          console.log(``);
+        });
+      } else {
+        console.log(`No projects found!`);
+      }
     },
     async use (args) {
       const idOrName = args[0];
