@@ -82,7 +82,7 @@ module.exports = ({ api, axios }) => {
       while (true) {
         status = await get(result.statusUrl);
 
-        if (status.stage === FINISHED || status.stage === FAILED || status.stage === CANCELED) {
+        if (!status || status.stage === FINISHED || status.stage === FAILED || status.stage === CANCELED) {
           break;
         } else if (json) {
           console.log(JSON.stringify(status));
