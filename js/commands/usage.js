@@ -14,7 +14,7 @@ module.exports = () => {
         {
           header: 'Subcommand List',
           content: [
-            { name: 'list', summary: 'List all projects in your Loadster team' },
+            {name: 'list', summary: 'List all projects in your Loadster team'},
             {
               name: 'use <project-id>',
               summary: 'Configure the CLI to use a project for all operations (playing scripts, running tests, etc)'
@@ -22,6 +22,26 @@ module.exports = () => {
           ]
         }
       ]));
+    } else if (command === 'play') {
+      console.log(cliUsage([
+        {
+          header: 'Usage',
+          content: `$ ${title} play [--file filename.js] [<script-id>]?`
+        },
+        {
+          header: 'Examples',
+          content: [
+            `  To play a script in the Loadster repository under the current project:`,
+            ``,
+            `  $ ${title} play <script-id>`,
+            ``,
+            `  To play a script from a file on your local filesystem:`,
+            ``,
+            `  $ ${title} play --file ./script.js`
+          ],
+          raw: true
+        }
+      ]))
     } else if (command === 'run') {
       console.log(cliUsage([
         {
@@ -62,7 +82,7 @@ module.exports = () => {
             ``,
             `  $ ${title} start <trigger-code> [--json] [--label(str)]`,
             ``,
-            `    --json          Print output in JSON instead of human - friendly`,
+            `    --json          Print output in JSON instead of human-friendly`,
             `    --label(str)    Label the test for easy identification later`
           ]
         }
@@ -81,7 +101,7 @@ module.exports = () => {
           header: 'Command List',
           content: [
             { name: 'login', summary: 'Log in to your Loadster account from the command line.' },
-            { name: 'play', summary: 'Play a script from a local file.' },
+            { name: 'play', summary: 'Play a script by name, ID, or a local file path.' },
             { name: 'start', summary: 'Start a load test using a trigger code.' },
             { name: 'run', summary: 'Run a load test using a trigger code, waiting for it to finish.' },
             { name: 'projects', summary: 'List your projects or use one for future operations.' },

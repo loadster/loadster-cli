@@ -66,16 +66,22 @@ module.exports = ({ api, config, events }) => {
     }
   }
 
-  return async function (filename) {
+  return async function (scriptId, filename) {
     const projectId = config.getProjectId();
-    const commands = await loadCommands(filename);
-
-    await events.subscribe(handleEvent);
 
     try {
-      const response = await api.playScript(projectId, commands);
+      await events.subscribe(handleEvent);
 
-      scriptRunId = response['scriptRunId'];
+      if (filename) {
+        const commands = await loadCommands(filename);
+        const response = await api.playScript(projectId, null, commands);
+
+        scriptRunId = response['scriptRunId'];
+      } else {
+        const response = await api.playScript(projectId, scriptId, null);
+
+        scriptRunId = response['scriptRunId'];
+      }
     } catch (err) {
       await unsubscribeAndFinish();
 

@@ -82,16 +82,19 @@ async function main () {
   } else if (options['command'] === 'play') {
     await checkSession();
 
-    const filename = argv[0];
+    const runOptions = args([
+      { name: 'id', type: String, defaultOption: true },
+      { name: 'file', type: String }
+    ], { argv });
+
     const projectId = config.getProjectId();
 
-    if (!filename) {
-      await usage(1, command);
-    } else if (!projectId) {
+    if (!projectId) {
       await usage(1, command, `No project configured! Choose a project with '${process.title} projects' before you play a script.`);
+    } else if (runOptions.id || runOptions.file) {
+      await play(runOptions.id, runOptions.file);
     } else {
-      await checkSession();
-      await play(filename);
+      await usage(1, command, 'Please specify a script.');
     }
   } else if (options['command'] === 'run') {
     if (argv.length > 0) {
