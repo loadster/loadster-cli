@@ -13,11 +13,13 @@ module.exports = ({ api, config }) => {
       const project = projects.find(p => p.id === idOrName || p.name === idOrName);
 
       if (project) {
-        console.log(`Using ${idOrName}`);
+        console.log(`Using ${project.name} <${project.id}>`);
 
         config.setProjectId(project.id);
-      } else {
+      } else if (idOrName) {
         console.error(`Project not found: ${idOrName}`);
+      } else {
+        console.error(`Project not specified!`);
       }
     }
   };
