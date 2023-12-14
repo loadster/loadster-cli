@@ -84,7 +84,7 @@ async function main () {
 
     const runOptions = args([
       { name: 'id', type: String, defaultOption: true },
-      { name: 'file', type: String }
+      { name: 'file', type: String, alias: 'f' }
     ], { argv });
 
     const projectId = config.getProjectId();

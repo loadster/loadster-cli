@@ -7,6 +7,7 @@ const { die } = require('../utils/control');
 
 module.exports = ({ api, config, events }) => {
   const logs = [];
+  const errors = [];
 
   let scriptRunId = null;
 
@@ -49,6 +50,10 @@ module.exports = ({ api, config, events }) => {
     await events.unsubscribe();
 
     flushLogs(0);
+
+    if (errors.length) {
+      process.exit(98);
+    }
   }
 
   async function handleEvent (type, data) {
@@ -63,6 +68,12 @@ module.exports = ({ api, config, events }) => {
       });
 
       flushLogs(LOG_BUFFER_MS);
+    } else if (type === 'PlayScriptCommandStatusEvent') {
+      if (data['status'] === 'error') {
+        console.log('an error!');
+
+        errors.push(data);
+      }
     }
   }
 
