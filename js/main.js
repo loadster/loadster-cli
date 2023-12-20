@@ -17,6 +17,11 @@ const cliOptions = [
     name: 'version',
     alias: 'v',
     type: Boolean
+  },
+  {
+    name: 'help',
+    alias: 'h',
+    type: Boolean
   }
 ];
 
@@ -60,7 +65,9 @@ async function main () {
   const command = options['command'];
   const argv = options._unknown || [];
 
-  if (options['version'] || command === 'version') {
+  if (options['help'] && !command) {
+    await usage(1, 'help');
+  } else if (options['version'] || command === 'version') {
     await version();
   } else if (command === 'login') {
     await login();
@@ -70,12 +77,17 @@ async function main () {
     if (argv.length > 0) {
       let runOptions = args([
         { name: 'label', type: String },
-        { name: 'json', type: Boolean }
+        { name: 'json', type: Boolean },
+        { name: 'help', alias: 'h', type: Boolean }
       ], { argv: argv.slice(1) });
 
-      await checkSession();
+      if (runOptions.help) {
+        await usage(1, command);
+      } else {
+        await checkSession();
 
-      await start(argv[0], runOptions.label, runOptions.json);
+        await start(argv[0], runOptions.label, runOptions.json);
+      }
     } else {
       await usage(1, command);
     }
@@ -101,11 +113,16 @@ async function main () {
       let runOptions = args([
         { name: 'label', type: String },
         { name: 'json', type: Boolean },
-        { name: 'assert', type: String, multiple: true }
+        { name: 'assert', type: String, multiple: true },
+        { name: 'help', alias: 'h', type: Boolean }
       ], { argv: argv.slice(1) });
 
-      await checkSession();
-      await run(argv[0], runOptions.label, runOptions.json, runOptions.assert);
+      if (runOptions.help) {
+        await usage(1, command);
+      } else {
+        await checkSession();
+        await run(argv[0], runOptions.label, runOptions.json, runOptions.assert);
+      }
     } else {
       await usage(1, command);
     }
