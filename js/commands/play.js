@@ -45,11 +45,15 @@ module.exports = ({ api, config, events }) => {
   }
 
   async function unsubscribeAndFinish () {
-    scriptRunId = null;
-
     await events.unsubscribe();
 
     flushLogs(0);
+
+    const url = `${config.getDashboardBaseUrl()}/projects/${config.getProjectId()}/runs/${scriptRunId}`;
+
+    console.log(`\nView the full script run results at ${url}\n`);
+
+    scriptRunId = null;
 
     if (errors.length) {
       process.exit(98);

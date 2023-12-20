@@ -37,6 +37,9 @@ module.exports = {
   getApiBaseUrl () {
     return process.env['LOADSTER_API_URL'] || 'https://api.loadster.app';
   },
+  getDashboardBaseUrl () {
+    return process.env['LOADSTER_DASHBOARD_URL'] || 'https://loadster.app/dashboard';
+  },
   getPusherKey () {
     return '90d3c779a92f12206ce8';
   }
