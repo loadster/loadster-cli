@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/loadster/loadster-cli#readme",
   "dependencies": {
-    "axios": "^0.26.1",
+    "axios": "^1.6.0",
     "colors": "^1.4.0",
     "command-line-args": "^5.2.1",
     "command-line-usage": "^6.1.3",
