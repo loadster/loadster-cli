@@ -1,4 +1,4 @@
-# Loadster CLI
+# Loadster Command Line Interface
 
 This is a simple Loadster Command Line Interface, to work with Loadster's
 cloud-hybrid load testing platform at [loadster.app](https://loadster.app).
