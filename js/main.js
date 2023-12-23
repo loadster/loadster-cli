@@ -8,7 +8,7 @@ const axios = require('axios').create({
   timeout: 10000
 });
 
-const cliOptions = [
+const MAIN_OPTIONS = [
   {
     name: 'command',
     defaultOption: true
@@ -23,6 +23,28 @@ const cliOptions = [
     alias: 'h',
     type: Boolean
   }
+];
+
+const START_OPTIONS = [
+  {name: 'trigger', type: String, defaultOption: true},
+  {name: 'script', type: String},
+  {name: 'type', type: String, defaultValue: 'protocol'},
+  {name: 'bots', type: Number},
+  {name: 'location', type: String},
+  {name: 'ramp-up-minutes', type: Number},
+  {name: 'ramp-up-pattern', type: String},
+  {name: 'peak-minutes', type: Number},
+  {name: 'ramp-down-minutes', type: Number},
+  {name: 'ramp-down-pattern', type: String},
+  {name: 'label', type: String},
+  {name: 'json', type: Boolean},
+  {name: 'help', alias: 'h', type: Boolean}
+];
+
+const PLAY_OPTIONS = [
+  { name: 'id', type: String, defaultOption: true },
+  { name: 'file', type: String, alias: 'f' },
+  { name: 'type', type: String, defaultValue: 'protocol' }
 ];
 
 axios.interceptors.request.use(async requestConfig => {
@@ -43,7 +65,7 @@ const events = require('./utils/events')({ config });
 const login = require('./commands/login')({ api, config });
 const logout = require('./commands/logout')({ config });
 const play = require('./commands/play')({ api, events, config, control });
-const start = require('./commands/start')({ api });
+const start = require('./commands/start')({ api, config });
 const run = require('./commands/run')({ api, axios });
 const projects = require('./commands/projects')({ api, config });
 const usage = require('./commands/usage')();
@@ -60,8 +82,30 @@ async function checkSession () {
   }
 }
 
+async function printTestResults(result, json = false) {
+  if (json) {
+    console.log(JSON.stringify(result, null, '  '));
+  } else {
+    if (result.message) {
+      console.log(`${result.message}\n`);
+    }
+
+    if (result.reportUrl) {
+      console.log(`View the running test or test report in your browser:\n\n${result.reportUrl}\n`);
+    }
+
+    if (result.statusUrl) {
+      console.log(`Fetch the current test status as JSON at any time:\n\n${result.statusUrl}\n`);
+    }
+
+    if (result.reportDataUrl) {
+      console.log(`Fetch the test report data as JSON after finishing:\n\n${result.reportDataUrl}\n`);
+    }
+  }
+}
+
 async function main () {
-  const options = args(cliOptions, { stopAtFirstUnknown: true });
+  const options = args(MAIN_OPTIONS, { stopAtFirstUnknown: true });
   const command = options['command'];
   const argv = options._unknown || [];
 
@@ -74,37 +118,22 @@ async function main () {
   } else if (command === 'logout') {
     await logout();
   } else if (command === 'start') {
-    if (argv.length > 0) {
-      let runOptions = args([
-        { name: 'label', type: String },
-        { name: 'json', type: Boolean },
-        { name: 'help', alias: 'h', type: Boolean }
-      ], { argv: argv.slice(1) });
+    await checkSession();
 
-      if (runOptions.help) {
-        await usage(1, command);
-      } else {
-        await checkSession();
+    const startOptions = args(START_OPTIONS, {argv});
+    const startResult = await start(startOptions);
 
-        await start(argv[0], runOptions.label, runOptions.json);
-      }
-    } else {
-      await usage(1, command);
-    }
+    await printTestResults(startResult, startOptions.json);
   } else if (options['command'] === 'play') {
     await checkSession();
 
-    const runOptions = args([
-      { name: 'id', type: String, defaultOption: true },
-      { name: 'file', type: String, alias: 'f' }
-    ], { argv });
-
+    const playOptions = args(PLAY_OPTIONS, {argv});
     const projectId = config.getProjectId();
 
     if (!projectId) {
       await usage(1, command, `No project configured! Choose a project with '${process.title} projects' before you play a script.`);
-    } else if (runOptions.id || runOptions.file) {
-      await play(runOptions.id, runOptions.file);
+    } else if (playOptions.id || playOptions.file) {
+      await play(playOptions);
     } else {
       await usage(1, command, 'Please specify a script.');
     }

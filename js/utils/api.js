@@ -1,3 +1,5 @@
+const { apiBotTypes } = require('./converter');
+
 module.exports = ({ axios }) => {
   return {
     async login (username, password) {
@@ -15,8 +17,8 @@ module.exports = ({ axios }) => {
 
       return result.data;
     },
-    async getScript (projectId, scriptId) {
-      const result = await axios.get(`/projects/${projectId}/scripts/${scriptId}`);
+    async listEngines () {
+      const result = await axios.get(`/engines`, { params: { 'includeCloud': true }});
 
       return result.data;
     },
@@ -25,8 +27,24 @@ module.exports = ({ axios }) => {
 
       return response.data;
     },
-    async playScript (projectId, scriptId, commands) {
-      const response = await axios.post(`/player/script/actions/start`, { projectId, scriptId, commands, source: 'CLI' });
+    async playScript (projectId, scriptId, type, commands) {
+      const response = await axios.post(`/player/script/actions/start`, {
+        projectId,
+        scriptId,
+        commands,
+        source: 'CLI',
+        type: apiBotTypes[type?.toLowerCase() || 'protocol']
+      });
+
+      return response.data;
+    },
+    async launchTest (projectId, label, populations) {
+      const response = await axios.post(`/cloud/tests`, {
+        repositoryProjectId: projectId,
+        label: label,
+        populations: populations,
+        source: 'cli'
+      });
 
       return response.data;
     }
