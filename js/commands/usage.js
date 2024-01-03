@@ -1,33 +1,124 @@
-const Process = require('process')
+const process = require('process');
+const cliUsage = require('command-line-usage');
 
-module.exports = (exitCode) => {
-    console.log(`This is the command line interface for Loadster's cloud-hybrid testing platform.`)
-    console.log(`To build Loadster test scenarios and get trigger codes, go to:`)
-    console.log()
-    console.log(`    https://loadster.app/dashboard/`)
-    console.log()
-    console.log(`To start a test and exit:`)
-    console.log()
-    console.log(`    ${Process.title} start <trigger-code> [--json] [--label (str)]`)
-    console.log()
-    console.log(`        --json             Print output in JSON instead of human-friendly`)
-    console.log(`        --label (str)      Label the test for easy identification later`)
-    console.log()
-    console.log(`To run a test, waiting until it finishes:`)
-    console.log()
-    console.log(`    ${Process.title} run <trigger-code> [--json] [--label (str)] [--assert (str)]`)
-    console.log()
-    console.log(`        --json             Print output in JSON instead of human-friendly`)
-    console.log(`        --label (str)      Label the test for easy identification later`)
-    console.log(`        --assert (str)     Assert a value match at the conclusion of a test`)
-    console.log()
-    console.log(`Examples of assertions:`)
-    console.log()
-    console.log(`        --assert 'totalErrors == 0'`)
-    console.log(`        --assert 'totalPages >= 1500'`)
-    console.log(`        --assert 'avgHitsPerSecond > 7.5'`)
-    console.log(`        --assert 'avgBytesPerSecond <= 10000'`)
+module.exports = () => {
+  return function (exitCode, command, hint = null) {
+    const title = process.title;
 
+    if (command === 'projects') {
+      console.log(cliUsage([
+        {
+          header: 'Usage',
+          content: `$ ${title} projects <subcommand>`
+        },
+        {
+          header: 'Subcommand List',
+          content: [
+            {name: 'list', summary: 'List all projects in your Loadster team'},
+            {
+              name: 'use <project-id>',
+              summary: 'Configure the CLI to use a project for all operations (playing scripts, running tests, etc)'
+            }
+          ]
+        }
+      ]));
+    } else if (command === 'play') {
+      console.log(cliUsage([
+        {
+          header: 'Usage',
+          content: `$ ${title} play [--file filename.js] [<script-id>]?`
+        },
+        {
+          header: 'Examples',
+          content: [
+            `  To play a script in the Loadster repository under the current project:`,
+            ``,
+            `  $ ${title} play <script-id>`,
+            ``,
+            `  To play a script from a file on your local filesystem:`,
+            ``,
+            `  $ ${title} play --file ./script.js`
+          ],
+          raw: true
+        }
+      ]))
+    } else if (command === 'run') {
+      console.log(cliUsage([
+        {
+          header: 'Usage',
+          content: `$ ${title} run <trigger-code>`
+        },
+        {
+          header: 'Examples',
+          content: [
+            `  To run a test with a scenario's trigger code and block until it finishes:`,
+            ``,
+            `  $ ${title} run <trigger-code> [--json] [--label (str)] [--assert (str)]*`,
+            ``,
+            `    --json             Print output in JSON instead of human-friendly`,
+            `    --label (str)      Label the test for easy identification later`,
+            `    --assert (str)     Assert a value match at the conclusion of a test`,
+            ``,
+            `  Examples of assertions:`,
+            ``,
+            `    --assert 'totalErrors == 0'`,
+            `    --assert 'totalPages >= 1500'`,
+            `    --assert 'avgHitsPerSecond > 7.5'`,
+            `    --assert 'avgBytesPerSecond <= 10000'`
+          ],
+          raw: true
+        }
+      ]));
+    } else if (command === 'start') {
+      console.log(cliUsage([
+        {
+          header: 'Usage',
+          content: `$ ${title} start <trigger-code> `
+        },
+        {
+          header: 'Examples',
+          content: [
+            `  To start a test with a scenario's trigger code and then exit immediately:`,
+            ``,
+            `  $ ${title} start <trigger-code> [--json] [--label(str)]`,
+            ``,
+            `    --json          Print output in JSON instead of human-friendly`,
+            `    --label(str)    Label the test for easy identification later`
+          ]
+        }
+      ]));
+    } else {
+      const guide = cliUsage([
+        {
+          header: 'Loadster CLI',
+          content: `This is the command line interface for Loadster's cloud-hybrid testing platform.`
+        },
+        {
+          header: 'Synopsis',
+          content: `  $ ${title} <options> <command>`
+        },
+        {
+          header: 'Command List',
+          content: [
+            { name: 'login', summary: 'Log in to your Loadster account from the command line.' },
+            { name: 'play', summary: 'Play a script by name, ID, or a local file path.' },
+            { name: 'start', summary: 'Start a load test using a trigger code.' },
+            { name: 'run', summary: 'Run a load test using a trigger code, waiting for it to finish.' },
+            { name: 'projects', summary: 'List your projects or use one for future operations.' },
+            { name: 'logout', summary: 'Log out of your Loadster account from the command line.' },
+            { name: 'help', summary: ` Display usage instructions (you're reading them).` },
+            { name: 'version', summary: `Display the Loadster CLI version.` }
+          ]
+        }
+      ]);
 
-    Process.exitCode = exitCode || 0
-}
+      console.log(guide + '\n');
+    }
+
+    if (hint) {
+      console.log(hint);
+    }
+
+    process.exitCode = exitCode || 0;
+  };
+};

@@ -1,5 +1,5 @@
-const Package = require ('../../package.json')
+const Package = require('../../package.json');
 
 module.exports = () => {
-    console.log(Package.version)
-}
+  console.log(Package.version);
+};
