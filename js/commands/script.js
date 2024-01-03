@@ -3,6 +3,7 @@ const LOG_BUFFER_MS = 200;
 
 const fs = require('fs/promises');
 const colors = require('colors/safe');
+const usage = require('./usage')();
 const {die} = require('../utils/control');
 const {apiBotTypes, createCodeCommandFromJavaScript} = require('../utils/converter');
 
@@ -101,9 +102,13 @@ module.exports = ({api, config, events}) => {
         scriptRunDashboardUrl = response['dashboardUrl'];
       }
     } catch (err) {
-      await unsubscribeAndFinish();
+      await events.unsubscribe();
 
-      die('Failed to play script!', err);
+      if (options.file) {
+        usage(1, 'play', `The file ${options.file} wasn't found or could not be read!`);
+      } else {
+        usage(1, 'play');
+      }
     }
   };
 }

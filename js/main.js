@@ -8,6 +8,30 @@ const axios = require('axios').create({
   timeout: 10000
 });
 
+axios.interceptors.request.use(async requestConfig => {
+  const token = config.getAuthToken();
+
+  if (token) {
+    requestConfig.auth = { username: 'token', password: token };
+  }
+
+  return requestConfig;
+}, error => {
+  return Promise.reject(error);
+});
+
+const api = require('./utils/api')({ axios });
+const events = require('./utils/events')({ config });
+
+const login = require('./commands/login')({ api, config });
+const logout = require('./commands/logout')({ config });
+const script = require('./commands/script')({ api, events, config, control });
+const test = require('./commands/test')({ api, axios, config });
+const projects = require('./commands/projects')({ api, config });
+const usage = require('./commands/usage')();
+const version = require('./commands/version');
+const { die } = require('./utils/control');
+
 const MAIN_OPTIONS = [
   {
     name: 'command',
@@ -41,36 +65,16 @@ const START_OPTIONS = [
   {name: 'help', alias: 'h', type: Boolean}
 ];
 
+const RUN_OPTIONS = [
+  ...START_OPTIONS,
+  {name: 'assert', type: String, multiple: true}
+];
+
 const PLAY_OPTIONS = [
   { name: 'id', type: String, defaultOption: true },
   { name: 'file', type: String, alias: 'f' },
   { name: 'type', type: String, defaultValue: 'protocol' }
 ];
-
-axios.interceptors.request.use(async requestConfig => {
-  const token = config.getAuthToken();
-
-  if (token) {
-    requestConfig.auth = { username: 'token', password: token };
-  }
-
-  return requestConfig;
-}, error => {
-  return Promise.reject(error);
-});
-
-const api = require('./utils/api')({ axios });
-const events = require('./utils/events')({ config });
-
-const login = require('./commands/login')({ api, config });
-const logout = require('./commands/logout')({ config });
-const play = require('./commands/play')({ api, events, config, control });
-const start = require('./commands/start')({ api, config });
-const run = require('./commands/run')({ api, axios });
-const projects = require('./commands/projects')({ api, config });
-const usage = require('./commands/usage')();
-const version = require('./commands/version');
-const { die } = require('./utils/control');
 
 async function checkSession () {
   try {
@@ -79,28 +83,6 @@ async function checkSession () {
     await usage(1, 'login', `You aren't logged in! Log in with '${process.title} login' first.`);
 
     process.exit(1);
-  }
-}
-
-async function printTestResults(result, json = false) {
-  if (json) {
-    console.log(JSON.stringify(result, null, '  '));
-  } else {
-    if (result.message) {
-      console.log(`${result.message}\n`);
-    }
-
-    if (result.reportUrl) {
-      console.log(`View the running test or test report in your browser:\n\n${result.reportUrl}\n`);
-    }
-
-    if (result.statusUrl) {
-      console.log(`Fetch the current test status as JSON at any time:\n\n${result.statusUrl}\n`);
-    }
-
-    if (result.reportDataUrl) {
-      console.log(`Fetch the test report data as JSON after finishing:\n\n${result.reportDataUrl}\n`);
-    }
   }
 }
 
@@ -117,13 +99,6 @@ async function main () {
     await login();
   } else if (command === 'logout') {
     await logout();
-  } else if (command === 'start') {
-    await checkSession();
-
-    const startOptions = args(START_OPTIONS, {argv});
-    const startResult = await start(startOptions);
-
-    await printTestResults(startResult, startOptions.json);
   } else if (options['command'] === 'play') {
     await checkSession();
 
@@ -133,25 +108,31 @@ async function main () {
     if (!projectId) {
       await usage(1, command, `No project configured! Choose a project with '${process.title} projects' before you play a script.`);
     } else if (playOptions.id || playOptions.file) {
-      await play(playOptions);
+      await script(playOptions);
     } else {
       await usage(1, command, 'Please specify a script.');
     }
-  } else if (options['command'] === 'run') {
-    if (argv.length > 0) {
-      let runOptions = args([
-        { name: 'label', type: String },
-        { name: 'json', type: Boolean },
-        { name: 'assert', type: String, multiple: true },
-        { name: 'help', alias: 'h', type: Boolean }
-      ], { argv: argv.slice(1) });
+  } else if (command === 'start') {
+    await checkSession();
 
-      if (runOptions.help) {
-        await usage(1, command);
-      } else {
-        await checkSession();
-        await run(argv[0], runOptions.label, runOptions.json, runOptions.assert);
-      }
+    const startOptions = args(START_OPTIONS, {argv});
+
+    if (startOptions.help) {
+      await usage(1, command);
+    } else if (startOptions.trigger || startOptions.script) {
+      await test(startOptions, false);
+    } else {
+      await usage(1, command);
+    }
+  } else if (options['command'] === 'run') {
+    await checkSession();
+
+    const runOptions = args(RUN_OPTIONS, {argv});
+
+    if (runOptions.help) {
+      await usage(1, command);
+    } else if (runOptions.trigger || runOptions.script) {
+      await test(runOptions, true);
     } else {
       await usage(1, command);
     }
