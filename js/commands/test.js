@@ -34,7 +34,8 @@ const TEST_REPORT_KEYS = [
   'totalIterations'
 ];
 
-const RUNNING = 'RUNNING';
+const STARTING = 'STARTING';
+const STOPPING = 'STOPPING';
 const FINISHED = 'FINISHED';
 const FAILED = 'FAILED';
 const CANCELED = 'CANCELED';
@@ -176,8 +177,10 @@ module.exports = ({api, axios, config}) => {
           break;
         } else if (json) {
           console.log(JSON.stringify(status));
-        } else if (status.stage !== RUNNING) {
+        } else if (status.stage === STARTING) {
           console.log('Test is starting...');
+        } else if (status.stage === STOPPING) {
+          console.log('Test is stopping...');
         } else {
           status.runningUsers = status.populations.map(p => p.runningUsers).reduce((t, n) => t + n);
 
