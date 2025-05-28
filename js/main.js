@@ -52,7 +52,7 @@ const MAIN_OPTIONS = [
 const START_OPTIONS = [
   {name: 'trigger', type: String, defaultOption: true},
   {name: 'script', type: String},
-  {name: 'type', type: String, defaultValue: 'protocol'},
+  {name: 'type', type: String},
   {name: 'bots', type: Number},
   {name: 'location', type: String},
   {name: 'ramp-up-minutes', type: Number},
@@ -73,7 +73,7 @@ const RUN_OPTIONS = [
 const PLAY_OPTIONS = [
   { name: 'id', type: String, defaultOption: true },
   { name: 'file', type: String, alias: 'f' },
-  { name: 'type', type: String, defaultValue: 'protocol' }
+  { name: 'type', type: String, alias: 't' }
 ];
 
 async function checkSession () {

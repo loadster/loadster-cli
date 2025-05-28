@@ -108,7 +108,7 @@ module.exports = ({api, axios, config}) => {
       const engines = await api.listEngines();
 
       const {script, bots, location} = options;
-      const type = options['type']?.toLowerCase() || 'protocol';
+      const type = options['type']?.toLowerCase();
       const rampUpPattern = options['ramp-up-pattern'] || 'linear';
       const rampUpMinutes = options['ramp-up-minutes'] || 1;
       const peakMinutes = options['peak-minutes'] || 1;
