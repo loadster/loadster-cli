@@ -1,6 +1,6 @@
 {
   "name": "loadster-cli",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Loadster Command Line Utility",
   "main": "./js/main.js",
   "bin": "./js/main.js",
@@ -8,7 +8,7 @@
     "lint": "eslint --fix",
     "start": "node ./js/main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "pkg": "pkg package.json --targets node10-macos-x64,node10-windows-x64,node10-linux-x64 --out-path build",
+    "pkg": "pkg package.json --targets node16-macos-x64,node16-windows-x64,node16-linux-x64 --out-path build",
     "clean": "rm -rf build/*"
   },
   "repository": {
@@ -43,6 +43,7 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.0.0",
-    "eslint-plugin-standard": "^5.0.0"
+    "eslint-plugin-standard": "^5.0.0",
+    "pkg": "^5.8.1"
   }
 }
