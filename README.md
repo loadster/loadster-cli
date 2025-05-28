@@ -55,7 +55,8 @@ $ loadster play <script-id>
 To play a script on your local filesystem:
 
 ```
-$ loadster play -f ./examples/protocol-script.js
+$ loadster play -f ./examples/protocol-script.js -t protocol
+$ loadster play -f ./examples/browser-script.js -t browser
 ```
 
 When you play a script, the CLI will print the script logs in real time.
