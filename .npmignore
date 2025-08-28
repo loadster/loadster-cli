@@ -19,6 +19,9 @@ node_modules/
 # Development dependencies
 eslint*
 .eslintrc*
+.editorconfig
+.eslintignore
+
 
 # Other common dot files
 .env*
