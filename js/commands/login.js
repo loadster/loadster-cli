@@ -40,6 +40,7 @@ module.exports = ({ api, config }) => {
 
       console.log(`Logged in as ${loginResult.profile.email}`);
     } catch (err) {
+      console.error(err);
       throw new Error('Login failed! Please try again.');
     }
   };

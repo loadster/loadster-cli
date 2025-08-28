@@ -88,13 +88,7 @@ async function printTestResults(result, json = false) {
   }
 }
 
-module.exports = ({api, axios, config}) => {
-  async function get (url) {
-    let response = await axios.get(url);
-
-    return response.data;
-  }
-
+module.exports = ({api, config}) => {
   async function launchTest(options) {
     if (options.trigger) {
       const {trigger, label} = options;
@@ -171,7 +165,7 @@ module.exports = ({api, axios, config}) => {
       let status;
 
       while (true) {
-        status = await get(test.statusUrl);
+        status = await api.getUrl(test.statusUrl);
 
         if (!status || status.stage === FINISHED || status.stage === FAILED || status.stage === CANCELED) {
           break;
@@ -195,7 +189,7 @@ module.exports = ({api, axios, config}) => {
         await sleep(5000);
       }
 
-      let report = await get(test.reportDataUrl);
+      let report = await api.getUrl(test.reportDataUrl);
 
       report.maxUsers = report.maxVirtualUsers;
 

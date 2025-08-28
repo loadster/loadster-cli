@@ -1,32 +1,16 @@
+#!/usr/bin/env node
+
 const process = require('process');
 const args = require('command-line-args');
 const config = require('./utils/config');
 const control = require('./utils/control');
-
-const axios = require('axios').create({
-  baseURL: config.getApiBaseUrl(),
-  timeout: 10000
-});
-
-axios.interceptors.request.use(async requestConfig => {
-  const token = config.getAuthToken();
-
-  if (token) {
-    requestConfig.auth = { username: 'token', password: token };
-  }
-
-  return requestConfig;
-}, error => {
-  return Promise.reject(error);
-});
-
-const api = require('./utils/api')({ axios });
+const api = require('./utils/api')();
 const events = require('./utils/events')({ config });
 
 const login = require('./commands/login')({ api, config });
 const logout = require('./commands/logout')({ config });
 const script = require('./commands/script')({ api, events, config, control });
-const test = require('./commands/test')({ api, axios, config });
+const test = require('./commands/test')({ api, config });
 const projects = require('./commands/projects')({ api, config });
 const usage = require('./commands/usage')();
 const version = require('./commands/version');
