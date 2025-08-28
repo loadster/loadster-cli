@@ -3,7 +3,6 @@
 
 # Development files
 .DS_Store
-script.js
 build/
 
 # Git files
