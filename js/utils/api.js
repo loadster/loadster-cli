@@ -1,52 +1,88 @@
 const { apiBotTypes } = require('./converter');
+const config = require('./config');
 
-module.exports = ({ axios }) => {
+module.exports = () => {
+  const baseUrl = config.getApiBaseUrl();
+  const timeout = 10000;
+
+  const fetchWithTimeout = async (url, options = {}) => {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+
+    const token = config.getAuthToken();
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token && {
+        Authorization: `Basic ${Buffer.from(`token:${token}`).toString('base64')}`
+      }),
+      ...options.headers
+    };
+
+    try {
+      const fullUrl = /^https?:/.test(url) ? url : baseUrl + url;
+      const response = await fetch(fullUrl, {
+        ...options,
+        headers,
+        signal: controller.signal
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errText}`);
+      }
+
+      return await response.json();
+    } finally {
+      clearTimeout(id);
+    }
+  };
+
   return {
-    async login (username, password) {
-      const result = await axios.post(`/account/actions/login`, { username, password });
-
-      return result.data;
-    },
-    async getTeam () {
-      const result = await axios.get(`/team`);
-
-      return result.data;
-    },
-    async listProjects () {
-      const result = await axios.get(`/projects`);
-
-      return result.data;
-    },
-    async listEngines () {
-      const result = await axios.get(`/engines`, { params: { 'includeCloud': true }});
-
-      return result.data;
-    },
-    async invokeTrigger (triggerCode, label) {
-      const response = await axios.post(`/s/${triggerCode}?label=${encodeURI(label || '')}`);
-
-      return response.data;
-    },
-    async playScript (projectId, scriptId, type, commands) {
-      const response = await axios.post(`/player/script/actions/start`, {
-        projectId,
-        scriptId,
-        commands,
-        source: 'CLI',
-        type: apiBotTypes[type?.toLowerCase() || 'protocol']
+    async login(username, password) {
+      return await fetchWithTimeout(`/account/actions/login`, {
+        method: 'POST',
+        body: JSON.stringify({ username, password })
       });
-
-      return response.data;
     },
-    async launchTest (projectId, label, populations) {
-      const response = await axios.post(`/cloud/tests`, {
-        repositoryProjectId: projectId,
-        label: label,
-        populations: populations,
-        source: 'cli'
+    async getTeam() {
+      return await fetchWithTimeout(`/team`, { method: 'GET' });
+    },
+    async listProjects() {
+      return await fetchWithTimeout(`/projects`, { method: 'GET' });
+    },
+    async listEngines() {
+      const url = `/engines?includeCloud=true`;
+      return await fetchWithTimeout(url, { method: 'GET' });
+    },
+    async invokeTrigger(triggerCode, label) {
+      const encodedLabel = encodeURIComponent(label || '');
+      return await fetchWithTimeout(`/s/${triggerCode}?label=${encodedLabel}`, { method: 'POST' });
+    },
+    async playScript(projectId, scriptId, type, commands) {
+      return await fetchWithTimeout(`/player/script/actions/start`, {
+        method: 'POST',
+        body: JSON.stringify({
+          projectId,
+          scriptId,
+          commands,
+          source: 'CLI',
+          type: apiBotTypes[type?.toLowerCase() || 'protocol']
+        })
       });
-
-      return response.data;
+    },
+    async launchTest(projectId, label, populations) {
+      return await fetchWithTimeout(`/cloud/tests`, {
+        method: 'POST',
+        body: JSON.stringify({
+          repositoryProjectId: projectId,
+          label,
+          populations,
+          source: 'cli'
+        })
+      });
+    },
+    async getUrl(url) {
+      return await fetchWithTimeout(url);
     }
   };
 };
