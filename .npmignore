@@ -1,0 +1,27 @@
+# Claude Code directory
+.claude/
+
+# Development files
+.DS_Store
+script.js
+build/
+
+# Git files
+.git/
+.gitignore
+
+# IDE files
+.vscode/
+.idea/
+
+# Node modules (should already be excluded by default)
+node_modules/
+
+# Development dependencies
+eslint*
+.eslintrc*
+
+# Other common dot files
+.env*
+.nyc_output/
+.cache/
