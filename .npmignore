@@ -3,7 +3,6 @@
 
 # Development files
 .DS_Store
-script.js
 build/
 
 # Git files
@@ -20,6 +19,9 @@ node_modules/
 # Development dependencies
 eslint*
 .eslintrc*
+.editorconfig
+.eslintignore
+
 
 # Other common dot files
 .env*
