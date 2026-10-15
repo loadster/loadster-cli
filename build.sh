@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 ##
 # This simple build script makes zipped binaries for 3 platforms.
@@ -7,7 +8,7 @@
 
 VERSION=$(node -p "require('./package.json').version");
 
-pkg ./js/main.js --out-path build
+pkg ./js/main.js --targets node18-linux-x64,node18-macos-x64,node18-win-x64 --out-path build
 
 cd build
 
