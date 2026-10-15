@@ -35,7 +35,7 @@ module.exports = {
     localStorage.setItem(PROJECT_ID, projectId);
   },
   getApiBaseUrl () {
-    return process.env['LOADSTER_API_URL'] || 'https://api.loadster.app';
+    return process.env['LOADSTER_API_URL'] || 'https://api.loadster.com';
   },
   getPusherKey () {
     return '90d3c779a92f12206ce8';
