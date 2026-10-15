@@ -1,7 +1,7 @@
 # Loadster Command Line Interface
 
 This is a simple Loadster Command Line Interface, to work with Loadster's
-cloud-hybrid load testing platform at [loadster.app](https://loadster.app).
+cloud-hybrid load testing platform at [loadster.com](https://loadster.com).
 
 ## Installing the Loadster CLI
 
@@ -28,7 +28,7 @@ $ loadster run --help
 ## Play a Script
 
 The Loadster CLI can play scripts that exist in your Loadster repository
-(the ones visible on your [Loadster Dashboard](https://loadster.app/dashboard/))
+(the ones visible on your [Loadster Dashboard](https://loadster.com/dashboard/))
 or from local .js files on your filesystem.
 
 To play a script, you'll first need to log in to your Loadster account with the CLI.
@@ -72,7 +72,7 @@ automation.
 
 You can use this utility to kick off load tests from your Loadster
 scenarios. To run a load test, you must first create a scenario in
-your [Loadster Dashboard](https://loadster.app/dashboard/), and obtain
+your [Loadster Dashboard](https://loadster.com/dashboard/), and obtain
 the **trigger code** unique to that scenario.
 
 To launch a load test and exit immediately:
@@ -119,10 +119,10 @@ with a `0` exit code. Otherwise, it will exit with a non-zero exit code.
 
 ## Getting Help
 
-This open source CLI is fully supported by [Loadster](https://loadster.app)
+This open source CLI is fully supported by [Loadster](https://loadster.com)
 as a companion tool to our load testing platform. We would be happy to assist
 you if you're having trouble, but also would enjoy hearing how you're using
 the Loadster CLI in your Continuous Integration process or for whatever other
 situation you find it useful for.
 
-Email us at [support@loadster.app](mailto:support@loadster.app)!
+Email us at [help@loadster.com](mailto:help@loadster.com)!
