@@ -4,11 +4,14 @@
   "description": "Loadster Command Line Utility",
   "main": "./js/main.js",
   "bin": "./js/main.js",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "lint": "eslint --fix",
     "start": "node ./js/main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "pkg": "pkg package.json --targets node18-macos-x64,node18-windows-x64,node18-linux-x64 --out-path build",
+    "pkg": "pkg package.json --sea --targets node24-linux-x64,node24-macos-x64,node24-win-x64 --out-path build",
     "clean": "rm -rf build/*"
   },
   "repository": {
@@ -37,12 +40,12 @@
     "sleep-promise": "^9.1.0"
   },
   "devDependencies": {
+    "@yao-pkg/pkg": "^6.23.0",
     "eslint": "^8.13.0",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.0.0",
-    "eslint-plugin-standard": "^5.0.0",
-    "pkg": "^5.8.1"
+    "eslint-plugin-standard": "^5.0.0"
   }
 }
