@@ -10,7 +10,7 @@
   "scripts": {
     "lint": "eslint --fix",
     "start": "node ./js/main.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test",
     "pkg": "pkg package.json --sea --targets node24-linux-x64,node24-macos-x64,node24-win-x64 --out-path build",
     "clean": "rm -rf build/*"
   },
@@ -23,7 +23,7 @@
     "load",
     "testing"
   ],
-  "author": "Andy Hawkes <andy@loadster.app>",
+  "author": "Andy Hawkes <andy@loadster.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/loadster/loadster-cli/issues"

@@ -26,7 +26,7 @@ module.exports = () => {
       console.log(cliUsage([
         {
           header: 'Usage',
-          content: `$ ${title} play [--file filename.js] [<script-id>]?`
+          content: `$ ${title} play [--file filename.js] [--type protocol|browser] [<script-id>]?`
         },
         {
           header: 'Examples',
@@ -37,7 +37,11 @@ module.exports = () => {
             ``,
             `  To play a script from a file on your local filesystem:`,
             ``,
-            `  $ ${title} play --file ./script.js`
+            `  $ ${title} play --file ./script.js`,
+            ``,
+            `  A script from a file plays as a protocol script unless you add --type browser:`,
+            ``,
+            `  $ ${title} play --file ./browser-script.js --type browser`
           ],
           raw: true
         }
