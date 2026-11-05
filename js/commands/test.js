@@ -4,6 +4,7 @@ const sleep = require('sleep-promise');
 
 const {createCodeCommandFromJavaScript, apiBotTypes} = require('../utils/converter');
 const {die} = require('../utils/control');
+const {parseAssertion} = require('../utils/assertions');
 
 const TEST_STATUS_KEYS = [
   'runningUsers',
@@ -47,23 +48,6 @@ function formatHHMMSS (ms) {
   let s = Math.floor((ms % 60000) / 1000);
 
   return `${h}:${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
-}
-
-function parseAssertion (str) {
-  let regex = /^\s*?(\w+)\s*?([<=>][=]?)\s*?(\w+)\s*?$/;
-  let parsed = str.match(regex);
-
-  if (parsed.length !== 4) {
-    throw new Error(`invalid assertion [${str}]`);
-  } else if (isNaN(parseFloat(parsed[3]))) {
-    throw new Error(`invalid assertion value [${parsed[3]}] in assertion [${str}]`);
-  } else {
-    return {
-      name: parsed[1],
-      operator: parsed[2],
-      value: parseFloat(parsed[3])
-    };
-  }
 }
 
 async function printTestResults(result, json = false) {
@@ -158,8 +142,7 @@ module.exports = ({api, config}) => {
     }
   }
 
-  async function watchTest (test, { assert, json }) {
-    let assertions = (assert || []).map(parseAssertion);
+  async function watchTest (test, assertions, { json }) {
 
     try {
       let status;
@@ -254,12 +237,21 @@ module.exports = ({api, config}) => {
   }
 
   return async function (options, evaluate) {
+    let assertions = [];
+
+    // Check the assertions before launching, so a typo doesn't leave a test running unwatched
+    try {
+      assertions = (options.assert || []).map(parseAssertion);
+    } catch (err) {
+      die(err.message);
+    }
+
     const test = await launchTest(options);
 
     await printTestResults(test, options.json);
 
     if (evaluate) {
-      await watchTest(test, options);
+      await watchTest(test, assertions, options);
     }
   };
 }

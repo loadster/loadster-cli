@@ -5,7 +5,8 @@ const fs = require('fs/promises');
 const colors = require('colors/safe');
 const usage = require('./usage')();
 const {die} = require('../utils/control');
-const {apiBotTypes, createCodeCommandFromJavaScript} = require('../utils/converter');
+const {createCodeCommandFromJavaScript} = require('../utils/converter');
+const {resolvePlayType} = require('../utils/play');
 
 const logs = [];
 const errors = [];
@@ -84,19 +85,23 @@ module.exports = ({api, config, events}) => {
   return async function (options) {
     const projectId = config.getProjectId();
 
+    const {type, error} = resolvePlayType(options);
+
+    if (error) {
+      die(error);
+    }
+
     try {
       await events.subscribe(handleEvent);
 
-      if (!apiBotTypes[options.type]) {
-        die('Please specify a --type of protocol or browser.');
-      } else if (options.file) {
+      if (options.file) {
         const commands = await loadCommands(options.file);
-        const response = await api.playScript(projectId, null, options.type, commands);
+        const response = await api.playScript(projectId, null, type, commands);
 
         scriptRunId = response['scriptRunId'];
         scriptRunDashboardUrl = response['dashboardUrl'];
       } else {
-        const response = await api.playScript(projectId, options.id, options.type);
+        const response = await api.playScript(projectId, options.id, type);
 
         scriptRunId = response['scriptRunId'];
         scriptRunDashboardUrl = response['dashboardUrl'];

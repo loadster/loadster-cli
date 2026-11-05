@@ -1,5 +1,5 @@
-http.get('https://loadster.app');
+http.get('https://loadster.com');
 
 bot.wait(3000);
 
-http.get('https://loadster.app/manual/');
+http.get('https://loadster.com/manual/');

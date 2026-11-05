@@ -66,7 +66,8 @@ module.exports = () => {
           scriptId,
           commands,
           source: 'CLI',
-          type: apiBotTypes[type?.toLowerCase() || 'protocol']
+          // When playing by ID, the script's own type is used, so the type may be left out
+          type: type ? apiBotTypes[type.toLowerCase()] : undefined
         })
       });
     },
