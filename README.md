@@ -37,6 +37,9 @@ To play a script, you'll first need to log in to your Loadster account with the 
 $ loadster login
 ```
 
+The CLI signs in with your Loadster email and password. It doesn't support
+signing in with a personal access token yet.
+
 You'll also need to select a project:
 
 ```
